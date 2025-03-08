@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Fire</title>
+    <style>
+        /* Basic styling for fullscreen canvas  */
+        body {
+            margin: 0;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        canvas {
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireCanvas"></canvas>
+    <script>
+        // Get the canvas element and set up the context
+        const canvas = document.getElementById("fireCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Mouse position variables
+        let mouseX = canvas.width / 2;
+        let mouseY = canvas.height / 2;
+
+        // Particle class representing a single fire particle
+        class Particle {
+            constructor(x, y, size, speedY) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.speedY = speedY;
+                this.alpha = 1;
+            }
+            
+            // Update particle position and transparency
+            update() {
+                this.y -= this.speedY;
+                this.alpha -= 0.02;
+            }
+            
+            // Draw particle on the canvas
+            draw() {
+                ctx.fillStyle = `rgba(255, ${Math.random() * 150}, 0, ${this.alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Array to store fire particles
+        let particles = [];
+
+        // Function to create new particles at the mouse position
+        function createParticles() {
+            for (let i = 0; i < 5; i++) {
+                const x = mouseX + (Math.random() - 0.5) * 15;
+                const y = mouseY;
+                const size = Math.random() * 5 + 2;
+                const speedY = Math.random() * 2 + 1;
+                particles.push(new Particle(x, y, size, speedY));
+            }
+        }
+
+        // Main animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            createParticles();
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                // Remove particles that have faded out
+                if (particles[i].alpha <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // Update mouse position on movement
+        window.addEventListener("mousemove", (event) => {
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
